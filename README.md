@@ -119,7 +119,7 @@ Install from a workstation with `fastboot`. bt0 serves fastboot when it is start
        fastboot flash boot0 boot0.bin
        fastboot continue
 
-The image write takes about 20 minutes, because the R2S's eMMC only accepts writes on its 1-bit bus. After the final `continue`, the board boots the new system, which expands its root filesystem and generates SSH host keys on first boot.
+The flasher writes the eMMC with DMA on its 8-bit bus at about 30 MB/s, and TRIMs empty regions instead of writing zeros; the USB download runs at about 23 MB/s. After the final `continue`, the board boots the new system, which expands its root filesystem and generates SSH host keys on first boot.
 
 On a board already running this image, `r2s-boot-chain install --yes` rewrites boot0 and boot1 from the copy in the image. It backs up both partitions first and reads the result back. `r2s-boot-chain status` compares without writing.
 
