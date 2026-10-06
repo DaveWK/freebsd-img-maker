@@ -1,0 +1,6 @@
+
+# freebsd-img-maker: root logs in with its password; no keys are installed.
+PermitRootLogin yes
+PasswordAuthentication yes
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no

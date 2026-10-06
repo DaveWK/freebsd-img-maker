@@ -1,0 +1,45 @@
+MIT License
+
+Copyright (c) 2026 opi-rv2-freebsd contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+The MIT terms above cover this repository's own work: the image recipe
+(config/, runtime/, scripts/, tools/, profiles/), the documentation under
+docs/ and archive/, and the workspace checks.
+
+They do NOT relicense third-party material:
+
+  * patches/freebsd/*.patch and archive/rv2-fork-lane/patches/*.patch modify
+    FreeBSD sources and carry the license of the files they touch: the kernel
+    and driver files are BSD-2-Clause (sys/dev/smte/if_smte* also carry ISC
+    portions from OpenBSD), and the device-tree files under
+    sys/contrib/device-tree are GPL-2.0 OR MIT per their SPDX headers.
+  * archive/wifi-ap6256/brcmfmac/ is an ISC-licensed driver port; see its
+    LICENSE.
+  * archive/wifi-ap6256/firmware/ contains redistributable proprietary
+    Broadcom firmware under LICENSE.brcm80211 in that directory.
+  * The freebsd-src and OPNsense-RISC repositories (sibling checkouts
+    pinned by config/, not part of this tree) each carry their own
+    LICENSE/COPYRIGHT.
+
+Images produced by this repository are aggregations of FreeBSD and the
+material above; the corresponding notices travel with them.

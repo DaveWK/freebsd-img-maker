@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "policy": "maximum-tested-mtu1500-endpoint-throughput",
+  "mtu": 1500,
+  "loader": {
+    "hw.smte.0.dma_translate": "1",
+    "hw.smte.1.dma_translate": "0",
+    "hw.smte.0.sw_lro": "1",
+    "hw.smte.0.tx_pack": "1",
+    "hw.smte.0.tx_queue_len": "1024"
+  },
+  "sysctl": {
+    "net.inet.tcp.sendspace": 524288,
+    "net.inet.tcp.recvspace": 1048576,
+    "net.inet.tcp.sendbuf_auto": 0,
+    "net.inet.tcp.recvbuf_auto": 0
+  },
+  "note": "Initial buffers apply to ordinary new TCP sockets; applications can still explicitly choose their own buffers. CPU fixed-clock startup remains 1.6 GHz / 1.05 V. Queue capacity changes at driver attach."
+}

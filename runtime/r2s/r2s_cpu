@@ -1,0 +1,31 @@
+#!/bin/sh
+# Install as /usr/local/etc/rc.d/r2s_cpu; enable with sysrc r2s_cpu_enable=YES.
+# PROVIDE: r2s_cpu
+# REQUIRE: FILESYSTEMS kld
+# BEFORE: netif
+# KEYWORD: nojail
+
+# rc.subr consumes the service variables and callbacks below.
+# shellcheck disable=SC2034
+
+# shellcheck disable=SC1091
+. /etc/rc.subr
+
+name="r2s_cpu"
+rcvar="r2s_cpu_enable"
+desc="Apply the validated Orange Pi R2S CPU voltage and clock state"
+start_cmd="r2s_cpu_start"
+stop_cmd=":"
+required_files="/usr/local/sbin/r2s-cpu-clock.sh"
+
+r2s_cpu_start()
+{
+    # A rejected state must leave boot running, with the failure on the console.
+    # The helper checks board identity, voltage, PLL and mux values before writes.
+    /bin/sh /usr/local/sbin/r2s-cpu-clock.sh 1600
+}
+
+load_rc_config "$name"
+: "${r2s_cpu_enable:=NO}"
+r2s_cpu_svcj="NO"
+run_rc_command "$1"

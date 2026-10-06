@@ -1,0 +1,58 @@
+BSD 2-Clause License
+
+Copyright (c) 2026, DaveWK
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+-------------------------------------------------------------------------------
+Scope of this license / upstream-derived code
+-------------------------------------------------------------------------------
+
+The BSD-2-Clause grant above covers the ORIGINAL contributions authored for
+this repository (build tooling, scripts, documentation, and the SpacemiT K1
+driver work authored by Daniel Shue). It does NOT relicense third-party or
+upstream-derived material.
+
+Several files carry their own SPDX-License-Identifier header, which governs
+that file and takes precedence over this top-level LICENSE. In particular:
+
+  * archive/freebsd/            - FreeBSD/OpenBSD-derived kernel drivers. Most are
+                              BSD-2-Clause (c) Daniel Shue; some retain
+                              additional upstream terms, e.g.:
+                                - archive/freebsd/pmap.c ........... BSD-4-Clause
+                                  (FreeBSD-derived)
+                                - archive/freebsd/if_smte.c ........ BSD-2-Clause
+                                  AND ISC (portions (c) Mark Kettenis, OpenBSD)
+                                - archive/freebsd/if_smtereg.h ..... ISC (OpenBSD)
+  * archive/freebsd/brcmfmac/   - Broadcom fullmac Wi-Fi driver port. ISC-licensed;
+                              see archive/freebsd/brcmfmac/LICENSE.
+  * archive/freebsd/dts/        - Device trees derived from Linux. GPL-2.0 OR MIT
+                              (per the upstream SpacemiT/mainline DTS).
+  * archive/rv2/firmware/ap6256/    - Redistributable Broadcom binary firmware. NOT
+                              covered by this license; governed by
+                              archive/rv2/firmware/ap6256/LICENSE.brcm80211.
+
+OPNsense-derived pieces, where present, remain under OPNsense's own
+BSD-2-Clause terms. This repository does not relicense any upstream FreeBSD,
+OpenBSD, Linux, OPNsense, or Broadcom code; each such file keeps the license
+under which it was received. See NOTICE for a summary.

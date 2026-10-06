@@ -1,0 +1,3 @@
+# Extra patches applied in order with git am on top of FREEBSD_COMMIT, one
+# file name per line; each must be listed in SHA256SUMS. None are needed now:
+# the K1 board support is in the pinned OpiK1 commit.

@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# PROVIDE: smte_macs
+# REQUIRE: FILESYSTEMS
+# BEFORE: netif
+# KEYWORD: nojail
+#
+# Give smte0/smte1 the board's real MACs from the ONIE TLV EEPROM before the
+# network comes up, so DHCP leases and firewall rules stay stable across boots.
+
+# rc.subr consumes these service variables and callbacks.
+# shellcheck disable=SC2034
+# shellcheck disable=SC1091
+. /etc/rc.subr
+
+name="smte_macs"
+rcvar="smte_macs_enable"
+start_cmd="smte_macs_start"
+stop_cmd=":"
+
+load_rc_config $name
+: ${smte_macs_enable:="YES"}
+
+smte_macs_start()
+{
+	/usr/local/sbin/smte-macs.sh
+}
+
+run_rc_command "$1"

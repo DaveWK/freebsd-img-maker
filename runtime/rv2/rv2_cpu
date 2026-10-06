@@ -1,0 +1,36 @@
+#!/bin/sh
+# PROVIDE: rv2_cpu
+# REQUIRE: FILESYSTEMS kld
+# BEFORE: netif securelevel
+# KEYWORD: nojail
+# rc.subr consumes the service variables below.
+# shellcheck disable=SC2034
+
+# shellcheck disable=SC1091
+. /etc/rc.subr
+
+name="rv2_cpu"
+desc="Apply the validated RV2 1.6 GHz CPU operating point"
+rcvar="rv2_cpu_enable"
+start_cmd="rv2_cpu_start"
+stop_cmd=":"
+status_cmd="rv2_cpu_status"
+required_files="/usr/local/sbin/rv2-cpu-clock /usr/local/libexec/rv2-clock/mmior /usr/local/libexec/rv2-clock/mmiow /usr/local/libexec/rv2-clock/pmicw"
+
+rv2_cpu_start()
+{
+    echo 'Applying RV2 CPU clock (1.6 GHz / 1.05 V).'
+    lockf -t 0 /var/run/rv2_cpu.lock \
+        env RV2_CLOCK_HELPERS=/usr/local/libexec/rv2-clock \
+        /usr/local/sbin/rv2-cpu-clock 1600
+}
+
+rv2_cpu_status()
+{
+    env RV2_CLOCK_HELPERS=/usr/local/libexec/rv2-clock \
+        /usr/local/sbin/rv2-cpu-clock status
+}
+
+load_rc_config "$name"
+: "${rv2_cpu_enable:=NO}"
+run_rc_command "$1"

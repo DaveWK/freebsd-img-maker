@@ -1,0 +1,4 @@
+# Device              Mountpoint  FStype   Options        Dump  Pass#
+/dev/gpt/rv2rootfs   /           ufs      rw             1     1
+/dev/gpt/rv2efi    /boot/efi   msdosfs  rw,noatime     0     0
+tmpfs                 /tmp        tmpfs    rw,mode=1777   0     0

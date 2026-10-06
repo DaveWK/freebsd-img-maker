@@ -1,0 +1,18 @@
+freebsd-img-maker
+Copyright (c) 2026 DaveWK. BSD 2-Clause License, see LICENSE.
+
+Files taken from other projects keep their licences:
+
+- runtime/r2s/, boards/r2s/loader.conf, boards/r2s/sysctl.conf and
+  boards/r2s/smte-performance.json come from the opi-r2s-freebsd workspace,
+  BSD 2-Clause (LICENSES/opi-r2s-freebsd.BSD-2-Clause).
+- runtime/rv2/, boards/rv2/loader.conf, boards/rv2/sysctl.conf and
+  boards/rv2/smte-performance.json come from the opi-rv2-freebsd workspace,
+  MIT (LICENSES/opi-rv2-freebsd.MIT).
+- config/k1-world-make.conf and config/linux-host.mk come from
+  DaveWK/freebsd-upstream, BSD 2-Clause.
+
+Images built here contain FreeBSD (see /COPYRIGHT in the image) and the boot
+chain from DaveWK/ore-edk-boot-opi: oreboot (GPL-2.0), OpenSBI
+(BSD-2-Clause) and EDK2 (BSD-2-Clause-Patent), with the device trees under
+their own licences.

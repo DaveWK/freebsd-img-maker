@@ -1,0 +1,3 @@
+[submodule "boot-chain"]
+	path = boot-chain
+	url = https://github.com/DaveWK/ore-edk-boot-opi.git
