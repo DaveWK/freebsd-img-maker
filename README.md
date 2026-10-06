@@ -9,7 +9,10 @@ FreeBSD images for the OrangePi R2S and OrangePi RV2, which use the SpacemiT K1 
 | `make r2s` | eMMC (8 GB) | `R2SPROD` | `freebsd-r2s.img` for the eMMC user area, plus `boot0.bin` and `next.img` for the eMMC boot partitions and `bt0.bin` for download mode |
 | `make rv2` | microSD | `RV2PROD` | `freebsd-rv2.img`, a complete bootable card image |
 
-Status: the images build and their layout is checked. They have not been boot-tested on hardware yet. The boot chain and kernels in them have been boot-tested separately.
+Status:
+
+- R2S: installed with fastboot and booted to login with SSH (October 2026).
+- RV2: the image builds and its layout is checked, but it has not been boot-tested on hardware yet.
 
 ## Login
 
@@ -102,16 +105,23 @@ To keep variables in the NOR instead, build your own image with `make rv2 UEFI_V
 | user area, GPT 1 `efiboot` | FAT16 ESP |
 | user area, GPT 2 `r2srootfs` | UFS2 root |
 
-To install:
-
-1. Write `freebsd-r2s.img` to the eMMC user area.
-2. Write `boot0.bin` to boot0 and `next.img` to boot1. On a board running this image, `r2s-boot-chain install --yes` does both. It backs up both partitions first and reads the result back. `r2s-boot-chain status` compares without writing.
-
-To try the chain without writing boot0, use download mode:
+Install from a workstation with `fastboot`. bt0 serves fastboot when it is started from the R2S's USB download mode:
 
 1. With the board powered off, hold down the download button.
-2. Connect the bottom USB-A port to the workstation with a USB-A to USB-A cable, then power the board on.
-3. Run `fastboot stage bt0.bin`, then `fastboot continue`.
+2. Connect the bottom USB-A port to the workstation with a USB-A to USB-A cable, then power the board on. The BootROM appears as USB device `361c:1001`.
+3. Run:
+
+       fastboot stage bt0.bin
+       fastboot continue
+       # bt0 trains DRAM and re-appears as a fastboot device (18d1:4ee0)
+       fastboot flash emmc freebsd-r2s.img
+       fastboot flash boot1 next.img
+       fastboot flash boot0 boot0.bin
+       fastboot continue
+
+The image write takes about 20 minutes, because the R2S's eMMC only accepts writes on its 1-bit bus. After the final `continue`, the board boots the new system, which expands its root filesystem and generates SSH host keys on first boot.
+
+On a board already running this image, `r2s-boot-chain install --yes` rewrites boot0 and boot1 from the copy in the image. It backs up both partitions first and reads the result back. `r2s-boot-chain status` compares without writing.
 
 ## Releases
 
