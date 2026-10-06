@@ -11,7 +11,7 @@ FreeBSD images for the OrangePi R2S and OrangePi RV2, which use the SpacemiT K1 
 
 Status:
 
-- R2S: installed with fastboot and booted to login with SSH (October 2026).
+- R2S: installed with fastboot and booted to login with SSH (October 2026). The FreeBSD kernel at the current pin also boots on it.
 - RV2: the image builds and its layout is checked, but it has not been boot-tested on hardware yet.
 
 ## Login
