@@ -2,7 +2,7 @@
 # Assemble the FreeBSD disk image for BOARD (r2s or rv2), unprivileged.
 #
 # Inputs: the staged world and BOARD kernel from build-freebsd.sh, the boot
-# chain from build-boot-chain.sh, and boards/BOARD + runtime/BOARD. Every
+# chain from fetch-boot-chain.sh, and boards/BOARD + runtime/BOARD. Every
 # file added or changed is recorded with owner and mode in the METALOG, from
 # which the bootstrapped makefs builds the root-owned UFS2 root and FAT16
 # ESP; mkimg writes the GPT image. Nothing here runs as root, mounts
@@ -46,7 +46,7 @@ done
 for f in world/METALOG world/boot/loader.efi "$board/METALOG" "$board/boot/kernel/kernel" "dtb/$DTB" BUILD; do
     [ -s "$stage/$f" ] || die "missing $stage/$f; run scripts/build-freebsd.sh"
 done
-(cd "$chain" && sha256sum --quiet -c SHA256SUMS) || die "no verified boot chain in $chain; run scripts/build-boot-chain.sh $board"
+(cd "$chain" && sha256sum --quiet -c SHA256SUMS) || die "no verified boot chain in $chain; run scripts/fetch-boot-chain.sh $board"
 
 mkdir -p "$here/build" "$out"
 work=$(mktemp -d "$here/build/.image-$board.XXXXXX")

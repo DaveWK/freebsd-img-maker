@@ -1,17 +1,17 @@
 # FreeBSD images for the OrangePi R2S and RV2 (SpacemiT K1), booted by the
-# U-Boot-free chain from ore-edk-boot-opi: oreboot bt0 -> OpenSBI -> EDK2.
+# U-Boot-free chain released by ore-edk-boot-opi: oreboot bt0 -> OpenSBI -> EDK2.
 #
 #   make r2s        out/r2s/freebsd-r2s.img (+ boot0.bin, next.img)
 #   make rv2        out/rv2/freebsd-rv2.img (bootable microSD image)
 #   make freebsd    fetch, cross-build and stage FreeBSD only
 #   make clean      remove out/ and the image work directories
 #   make distclean  also remove build/ (source, objects, stage)
-#   make mrproper   distclean, and clean the boot-chain checkout
+#   make mrproper   same as distclean (build/ holds the fetched boot chain too)
 #   make help       list the targets
 #
-# BOOT_CHAIN_OUT=DIR uses a prebuilt ore-edk-boot-opi out/BOARD directory.
-# UEFI_VARS=nor (RV2 only) keeps UEFI variables in the SPI NOR instead of RAM;
-# the build warns because EDK2 then erases NOR 0x2a0000-0x360000 on first boot.
+# The boot chain comes from the latest ore-edk-boot-* release for the board
+# (config/boot-chain.env); BOOT_CHAIN_RELEASE=<tag> pins one, and
+# BOOT_CHAIN_OUT=DIR uses a locally built ore-edk-boot-opi out/BOARD instead.
 # ROOT_PASSWORD (default Riscv123), ROOT_MB (default: fit the files) and
 # JOBS are passed through.
 
@@ -29,7 +29,7 @@ help:
 	@echo "source     fetch the pinned FreeBSD source"
 	@echo "clean      remove out/ and the image work directories"
 	@echo "distclean  also remove build/ (source, objects, stage)"
-	@echo "mrproper   distclean, and clean the boot-chain checkout"
+	@echo "mrproper   same as distclean (build/ holds the fetched boot chain too)"
 
 source:
 	sh scripts/fetch-source.sh
@@ -41,7 +41,7 @@ freebsd:
 	sh scripts/build-freebsd.sh
 
 boot-chain-%:
-	sh scripts/build-boot-chain.sh $*
+	sh scripts/fetch-boot-chain.sh $*
 
 $(BOARDS): %: $(STAGE_DONE) boot-chain-%
 	sh scripts/assemble-image.sh $*
@@ -53,4 +53,3 @@ distclean: clean
 	rm -rf build
 
 mrproper: distclean
-	[ ! -f boot-chain/Makefile ] || $(MAKE) -C boot-chain clean

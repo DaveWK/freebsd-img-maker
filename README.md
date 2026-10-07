@@ -29,21 +29,21 @@ Every Ethernet port asks for DHCP. On first boot, `growfs` expands the root file
 
 Builds run on Linux (Fedora), unprivileged. FreeBSD is cross-built with its own `tools/build/make.py`. Disk images are made with the bootstrapped `makefs` and `mkimg` from a METALOG, so nothing is mounted and nothing runs as root.
 
-    git clone --recurse-submodules https://github.com/DaveWK/freebsd-img-maker.git
+    git clone https://github.com/DaveWK/freebsd-img-maker.git
     cd freebsd-img-maker
     make r2s rv2
 
 Requirements:
 
 - FreeBSD: `clang`, `lld`, `llvm` (`llvm-ar`, `llvm-nm`, `llvm-objcopy`), `python3`, `git`, `openssl`.
-- Boot chain: the tools listed in ore-edk-boot-opi's README (RISC-V GCC, Rust, `dtc`, `mkimage`).
-- To skip building the boot chain, point `BOOT_CHAIN_OUT` at a built or released ore-edk-boot-opi `out/<board>` directory, for example `make rv2 BOOT_CHAIN_OUT=/path/to/out/rv2`.
+- Boot chain: `curl`. It is not built here: each board's bt0 and OpenSBI+EDK2 image come from the latest release of its ore-edk-boot-* repository (`config/boot-chain.env`; set `BOOT_CHAIN_RELEASE=<tag>` to pin one). `fastboot` is required on the flashing workstation.
+- To use your own boot-chain build instead, point `BOOT_CHAIN_OUT` at an ore-edk-boot-opi `out/<board>` directory, for example `make rv2 BOOT_CHAIN_OUT=/path/to/out/rv2`.
 
 The first build takes a few hours, most of it the FreeBSD world. The steps are:
 
 1. `scripts/fetch-source.sh` fetches the pinned FreeBSD commit (`config/freebsd.env`), checks its tree hash, and applies `patches/` (currently none).
 2. `scripts/build-freebsd.sh` runs `buildworld`, then `buildkernel` for `R2SPROD` and `RV2PROD`. It stages `installworld`, `distribution`, both kernels and both DTBs into `build/stage/`.
-3. `scripts/build-boot-chain.sh <board>` builds bt0 and the OpenSBI+EDK2 FIT from the pinned `boot-chain` submodule.
+3. `scripts/fetch-boot-chain.sh <board>` downloads `<board>-bt0.bin` and `<board>-next.img` from the board's ore-edk-boot-* release and verifies them against its `<board>-SHA256SUMS`.
 4. `scripts/assemble-image.sh <board>` adds the board configuration, runtime helpers, login settings and boot chain, then writes the image to `out/<board>/`.
 
 Tuning:
@@ -51,7 +51,6 @@ Tuning:
 - `JOBS` sets build parallelism.
 - `ROOT_MB` fixes the root filesystem size; by default the size fits the files plus headroom.
 - `ROOT_PASSWORD` sets a different root password.
-- `UEFI_VARS=nor` (RV2 only) keeps UEFI variables in the SPI NOR instead of RAM. The build warns about it; see the RV2 section below.
 
 ## What is in the images
 
@@ -94,7 +93,7 @@ To install, write the image to a card and boot the board from it:
 
 EDK2 in this image keeps UEFI variables in RAM and never writes the SPI NOR, so settings such as the boot order are not kept across power cycles.
 
-To keep variables in the NOR instead, build your own image with `make rv2 UEFI_VARS=nor`. The build prints a warning because EDK2 then erases and formats NOR 0x2A0000–0x360000 on first boot whenever that range holds no variable store. That destroys any firmware there, such as the vendor's, so back up the NOR first.
+To keep variables in the NOR instead, build the boot chain yourself (`make rv2 UEFI_VARS=nor` in ore-edk-boot-opi) and build the image with `BOOT_CHAIN_OUT` pointing at its `out/rv2`. EDK2 then erases and formats NOR 0x2A0000–0x360000 on first boot whenever that range holds no variable store. That destroys any firmware there, such as the vendor's, so back up the NOR first.
 
 ### R2S (eMMC)
 

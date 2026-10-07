@@ -40,11 +40,10 @@ jobs:
           ref: ${{ env.TAG }}
           persist-credentials: false
           fetch-depth: 1
-          submodules: true
       - name: Check build tools
         run: |
           for t in clang ld.lld llvm-ar llvm-nm llvm-objcopy python3 git openssl xz \
-              riscv64-linux-gnu-gcc gcc make cpp dtc fdtput mkimage cargo rustup; do
+              curl gcc make cpp; do
             command -v "$t" >/dev/null || { echo "missing tool on the runner: $t" >&2; exit 1; }
           done
       - name: Build FreeBSD
