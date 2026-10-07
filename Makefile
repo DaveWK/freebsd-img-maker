@@ -6,6 +6,8 @@
 #   make freebsd    fetch, cross-build and stage FreeBSD only
 #   make clean      remove out/ and the image work directories
 #   make distclean  also remove build/ (source, objects, stage)
+#   make mrproper   distclean, and clean the boot-chain checkout
+#   make help       list the targets
 #
 # BOOT_CHAIN_OUT=DIR uses a prebuilt ore-edk-boot-opi out/BOARD directory.
 # UEFI_VARS=nor (RV2 only) keeps UEFI variables in the SPI NOR instead of RAM;
@@ -16,9 +18,18 @@
 BOARDS := r2s rv2
 STAGE_DONE := build/stage/BUILD
 
-.PHONY: all $(BOARDS) freebsd source boot-chain-% clean distclean
+.PHONY: all help $(BOARDS) freebsd source boot-chain-% clean distclean mrproper
 
 all: $(BOARDS)
+
+help:
+	@echo "r2s        out/r2s/freebsd-r2s.img (+ boot0.bin, next.img)"
+	@echo "rv2        out/rv2/freebsd-rv2.img (bootable microSD image)"
+	@echo "freebsd    fetch, cross-build and stage FreeBSD only"
+	@echo "source     fetch the pinned FreeBSD source"
+	@echo "clean      remove out/ and the image work directories"
+	@echo "distclean  also remove build/ (source, objects, stage)"
+	@echo "mrproper   distclean, and clean the boot-chain checkout"
 
 source:
 	sh scripts/fetch-source.sh
@@ -40,3 +51,6 @@ clean:
 
 distclean: clean
 	rm -rf build
+
+mrproper: distclean
+	[ ! -f boot-chain/Makefile ] || $(MAKE) -C boot-chain clean
