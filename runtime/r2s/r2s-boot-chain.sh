@@ -13,7 +13,10 @@ set -eu
 share=/usr/local/share/k1-boot-chain
 boot0=/dev/mmcsd0boot0
 boot1=/dev/mmcsd0boot1
-die() { echo "r2s-boot-chain: $*" >&2; exit 1; }
+die() {
+    echo "r2s-boot-chain: $*" >&2
+    exit 1
+}
 
 [ -c "$boot0" ] && [ -c "$boot1" ] || die "no eMMC boot partitions ($boot0, $boot1)"
 (cd "$share" && sha256 -c "$(awk '$2=="boot0.bin"{print $1}' SHA256SUMS)" boot0.bin >/dev/null &&
@@ -41,7 +44,7 @@ install)
     mkdir -p "$backup"
     dd if="$boot0" of="$backup/boot0.raw" bs=1m status=none
     dd if="$boot1" of="$backup/boot1.raw" bs=1m status=none
-    (cd "$backup" && sha256 boot0.raw boot1.raw > SHA256)
+    (cd "$backup" && sha256 boot0.raw boot1.raw >SHA256)
     echo "backed up boot0 and boot1 to $backup"
     flags=$(sysctl -n kern.geom.debugflags)
     trap 'sysctl kern.geom.debugflags="$flags" >/dev/null' EXIT HUP INT TERM

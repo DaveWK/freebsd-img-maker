@@ -17,16 +17,14 @@ stop_cmd=":"
 status_cmd="rv2_cpu_status"
 required_files="/usr/local/sbin/rv2-cpu-clock /usr/local/libexec/rv2-clock/mmior /usr/local/libexec/rv2-clock/mmiow /usr/local/libexec/rv2-clock/pmicw"
 
-rv2_cpu_start()
-{
+rv2_cpu_start() {
     echo 'Applying RV2 CPU clock (1.6 GHz / 1.05 V).'
     lockf -t 0 /var/run/rv2_cpu.lock \
         env RV2_CLOCK_HELPERS=/usr/local/libexec/rv2-clock \
         /usr/local/sbin/rv2-cpu-clock 1600
 }
 
-rv2_cpu_status()
-{
+rv2_cpu_status() {
     env RV2_CLOCK_HELPERS=/usr/local/libexec/rv2-clock \
         /usr/local/sbin/rv2-cpu-clock status
 }

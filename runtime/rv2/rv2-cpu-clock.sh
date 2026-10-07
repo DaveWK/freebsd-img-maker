@@ -5,7 +5,10 @@
 set -eu
 PATH=${RV2_CLOCK_HELPERS:-/usr/local/libexec/rv2-clock}:/sbin:/bin:/usr/sbin:/usr/bin
 export PATH
-fail() { echo "cpu-clock: $*" >&2; exit 1; }
+fail() {
+    echo "cpu-clock: $*" >&2
+    exit 1
+}
 rd() {
     raw=$(mmior "$1" 1) || fail "cannot read $1"
     value=$(printf '%s\n' "$raw" | awk '
@@ -46,31 +49,42 @@ show() {
 }
 mode=${1:-show}
 case $mode in
-show|status|1600) ;;
+show | status | 1600) ;;
 *) fail 'usage: rv2-cpu-clock [show|status|1600]' ;;
 esac
 [ "$(uname -s)" = FreeBSD ] && [ "$(uname -m)" = riscv ] ||
     fail 'requires the RV2 FreeBSD riscv board'
 case " $(sysctl -n hw.fdt.compatible) " in
-    *' xunlong,orangepi-rv2 '*) ;;
-    *) fail 'device tree does not identify an Orange Pi RV2' ;;
+*' xunlong,orangepi-rv2 '*) ;;
+*) fail 'device tree does not identify an Orange Pi RV2' ;;
 esac
 [ "$(id -u)" -eq 0 ] || fail 'requires root'
 case $mode in
-show) show; exit 0 ;;
-status) verify_fast; echo 'RV2: both clusters at 1.6 GHz, buck1 1.05 V, PLL3 locked'; exit 0 ;;
+show)
+    show
+    exit 0
+    ;;
+status)
+    verify_fast
+    echo 'RV2: both clusters at 1.6 GHz, buck1 1.05 V, PLL3 locked'
+    exit 0
+    ;;
 esac
 # Reject unfamiliar PLL programming, dividers, or a partially changed state.
 check 0xd4090124 0x0050dd67
-c0=$(rd 0xd4282b8c); c1=$(rd 0xd4282b90)
+c0=$(rd 0xd4282b8c)
+c1=$(rd 0xd4282b90)
 v=$(voltage)
 if [ "$((c0))" -eq 583 ] && [ "$((c1))" -eq 583 ]; then
     verify_fast
-    echo 'Already at the validated 1.6 GHz register state'; show; exit 0
+    echo 'Already at the validated 1.6 GHz register state'
+    show
+    exit 0
 fi
 [ "$((c0))" -eq 576 ] && [ "$((c1))" -eq 576 ] || fail 'unexpected cluster clocks'
-check 0xd4090128 0; check 0xd409012c 0x43eaaaab
-case $v in 0x50|0x6e) ;; *) fail "unexpected buck1 voltage selector $v" ;; esac
+check 0xd4090128 0
+check 0xd409012c 0x43eaaaab
+case $v in 0x50 | 0x6e) ;; *) fail "unexpected buck1 voltage selector $v" ;; esac
 # Voltage MUST precede PLL/mux changes. Readback failure stops the sequence.
 pmicw 0x48 =0x6e
 [ "$(voltage)" = 0x6e ] || fail 'buck1 did not reach the 1.05 V selector'

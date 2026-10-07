@@ -13,8 +13,11 @@
 set -eu
 here=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 board=${1:?usage: build-boot-chain.sh r2s|rv2}
-die() { echo "build-boot-chain: $*" >&2; exit 1; }
-case "$board" in r2s|rv2) ;; *) die "unknown board $board" ;; esac
+die() {
+    echo "build-boot-chain: $*" >&2
+    exit 1
+}
+case "$board" in r2s | rv2) ;; *) die "unknown board $board" ;; esac
 uefi_vars=${UEFI_VARS:-ram}
 case "$uefi_vars" in
 ram) ;;
@@ -29,7 +32,7 @@ WARN
     ;;
 *) die "UEFI_VARS must be ram or nor, not $uefi_vars" ;;
 esac
-export UEFI_VARS=$uefi_vars
+export UEFI_VARS="$uefi_vars"
 dest=$here/build/boot-chain/$board
 
 if [ -n "${BOOT_CHAIN_OUT:-}" ]; then
@@ -50,7 +53,7 @@ fi
 rm -rf "$dest"
 mkdir -p "$dest"
 cp "$from/bt0.bin" "$from/next.img" "$dest/"
-(cd "$dest" && sha256sum bt0.bin next.img > SHA256SUMS)
-printf '%s\n' "$source" > "$dest/SOURCE"
+(cd "$dest" && sha256sum bt0.bin next.img >SHA256SUMS)
+printf '%s\n' "$source" >"$dest/SOURCE"
 echo "boot chain for $board: $source"
 cat "$dest/SHA256SUMS"

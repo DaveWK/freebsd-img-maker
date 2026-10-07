@@ -9,7 +9,10 @@ set -eu
 here=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 . "$here/config/freebsd.env"
 src=${FREEBSD_SRC:-$here/build/freebsd-src}
-die() { echo "fetch-source: $*" >&2; exit 1; }
+die() {
+    echo "fetch-source: $*" >&2
+    exit 1
+}
 
 patch_list() {
     grep -Ev '^[[:space:]]*(#|$)' "$here/patches/series"
@@ -51,6 +54,6 @@ for p in $(patch_list); do
         git -C "$src" -c user.name=freebsd-img-maker -c user.email=freebsd-img-maker@localhost \
         am -q --committer-date-is-author-date "$here/patches/$p" || die "patch $p does not apply"
 done
-git -C "$src" rev-parse 'HEAD^{tree}' > "$src.tree"
-printf '%s\n' "$want" > "$stamp"
+git -C "$src" rev-parse 'HEAD^{tree}' >"$src.tree"
+printf '%s\n' "$want" >"$stamp"
 echo "FreeBSD source ready: $src ($(cat "$src.tree"))"

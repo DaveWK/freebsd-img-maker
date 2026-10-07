@@ -25,11 +25,15 @@ out=${OUT_DIR:-$here/out}/$board
 root_password=${ROOT_PASSWORD:-Riscv123}
 root_mb=${ROOT_MB:-0}
 esp_mb=64
-die() { echo "assemble-image: $*" >&2; exit 1; }
+die() {
+    echo "assemble-image: $*" >&2
+    exit 1
+}
 
-case "$board" in r2s|rv2) ;; *) die "unknown board $board" ;; esac
+case "$board" in r2s | rv2) ;; *) die "unknown board $board" ;; esac
 [ "$(uname -s)" = Linux ] || die 'run on Linux'
 [ "$(id -u)" -ne 0 ] || die 'run unprivileged; nothing here needs root'
+# shellcheck source=/dev/null # the board is chosen at run time
 . "$here/boards/$board/board.conf"
 . "$here/config/freebsd.env"
 for t in python3 openssl sha256sum clang ld.lld; do
@@ -53,13 +57,13 @@ root=$work/root
 efi=$work/efi
 overrides=$work/METALOG.overrides
 removals=$work/METALOG.removals
-: > "$overrides"
-: > "$removals"
+: >"$overrides"
+: >"$removals"
 
 # Record PATH (relative to the root) with type, mode and owner; the last
 # record of a path wins over installworld's.
 meta() {
-    printf './%s type=%s uname=%s gname=%s mode=%s\n' "$1" "$2" "${4:-root}" "${5:-wheel}" "$3" >> "$overrides"
+    printf './%s type=%s uname=%s gname=%s mode=%s\n' "$1" "$2" "${4:-root}" "${5:-wheel}" "$3" >>"$overrides"
 }
 # mkdir -p as root: every new component is root:wheel 0755.
 mkdir_root() {
@@ -87,7 +91,7 @@ mkdir "$root"
 cp -a --reflink=auto "$stage/world/." "$root/"
 cp -a --reflink=auto "$stage/$board/." "$root/"
 rm -f "$root/METALOG"
-cat "$stage/world/METALOG" "$stage/$board/METALOG" > "$work/METALOG.base"
+cat "$stage/world/METALOG" "$stage/$board/METALOG" >"$work/METALOG.base"
 for path in etc/master.passwd etc/ttys etc/ssh/sshd_config boot/loader.efi boot/kernel/kernel; do
     grep -q "^\./$path " "$work/METALOG.base" || die "METALOG lacks ./$path"
 done
@@ -153,13 +157,13 @@ rv2)
     ;;
 esac
 install_root 0644 "$chain/next.img" "$share/next.img"
-(cd "$root/$share" && sha256sum -- * > "$work/chain.sums" && mv "$work/chain.sums" SHA256SUMS)
+(cd "$root/$share" && sha256sum -- * >"$work/chain.sums" && mv "$work/chain.sums" SHA256SUMS)
 meta "$share/SHA256SUMS" file 0644
 install_root 0644 "$chain/SOURCE" "$share/SOURCE"
 
 # [5/7] Login: root with a password, on the console and over SSH. No keys:
 # no authorized_keys and no host keys (sshd generates them on first boot).
-cat "$here/config/sshd_config.append" >> "$root/etc/ssh/sshd_config"
+cat "$here/config/sshd_config.append" >>"$root/etc/ssh/sshd_config"
 for directive in PermitRootLogin PasswordAuthentication KbdInteractiveAuthentication PermitEmptyPasswords; do
     [ "$(grep -c "^$directive " "$root/etc/ssh/sshd_config")" = 1 ] || die "sshd_config sets $directive more than once"
 done
@@ -167,22 +171,22 @@ root_hash=$(printf '%s\n' "$root_password" | openssl passwd -6 -stdin)
 printf '%s\n' "$root_hash" | grep -Eq '^[$]6[$][./0-9A-Za-z]{1,16}[$][./0-9A-Za-z]{86}$' ||
     die 'openssl did not produce a SHA-512 crypt hash'
 ROOT_HASH=$root_hash awk -F: -v OFS=: '$1 == "root" { $2 = ENVIRON["ROOT_HASH"]; n++ } { print } END { exit n != 1 }' \
-    "$root/etc/master.passwd" > "$work/master.passwd"
-cat "$work/master.passwd" > "$root/etc/master.passwd"
+    "$root/etc/master.passwd" >"$work/master.passwd"
+cat "$work/master.passwd" >"$root/etc/master.passwd"
 "$tools/pwd_mkdb" -i -p -d "$root/etc" "$root/etc/master.passwd"
 for key in "$root"/etc/ssh/ssh_host_*; do
     [ -e "$key" ] || continue
     rm -f "$key"
 done
-grep -o '^\./etc/ssh/ssh_host_[^ ]*' "$work/METALOG.base" >> "$removals" || :
-grep -o '^\./root/\.ssh/authorized_keys[^ ]*' "$work/METALOG.base" >> "$removals" || :
+grep -o '^\./etc/ssh/ssh_host_[^ ]*' "$work/METALOG.base" >>"$removals" || :
+grep -o '^\./root/\.ssh/authorized_keys[^ ]*' "$work/METALOG.base" >>"$removals" || :
 # Serial getty on the UART console, root allowed to log in there.
 sed 's/^ttyu0.*/ttyu0   "\/usr\/libexec\/getty 3wire"   vt100   onifconsole  secure/' \
-    "$root/etc/ttys" > "$work/ttys"
-cat "$work/ttys" > "$root/etc/ttys"
+    "$root/etc/ttys" >"$work/ttys"
+cat "$work/ttys" >"$root/etc/ttys"
 grep -q '^ttyu0 .*onifconsole  secure$' "$root/etc/ttys" || die 'ttyu0 getty line not set'
 # First boot: growfs fills the medium, sshd makes host keys.
-: > "$root/firstboot"
+: >"$root/firstboot"
 meta firstboot file 0644
 # newfs makes the root's .snap directory; makefs does not.
 mkdir_root .snap
@@ -206,7 +210,7 @@ sha() { sha256sum "$1" | cut -d' ' -f1; }
     echo "loader_sha256=$(sha "$root/boot/loader.efi")"
     echo "dtb_sha256=$(sha "$root/boot/dtb/$DTB")"
     echo "built_utc=$(date -u +%FT%TZ)"
-} > "$work/build-info"
+} >"$work/build-info"
 install_root 0644 "$work/build-info" etc/freebsd-img-maker
 
 # Merge the METALOGs: a path keeps its first position and its last record;
@@ -233,7 +237,7 @@ used_mb=$(du -sm --apparent-size "$root" | cut -f1)
 if [ "$root_mb" = 0 ]; then
     # Content plus a third and 512 MiB, in 256 MiB steps; growfs fills the
     # medium on first boot.
-    root_mb=$(( (used_mb * 4 / 3 + 512 + 255) / 256 * 256 ))
+    root_mb=$(((used_mb * 4 / 3 + 512 + 255) / 256 * 256))
 fi
 echo "==> $board: UFS2 root ${root_mb} MiB (${used_mb} MiB of files)"
 (cd "$root" && "$tools/makefs" -t ffs -B little -D -Z -N "$root/etc" -s "${root_mb}m" \
@@ -312,5 +316,5 @@ case "$board" in
 r2s) mv "$work/boot0.bin.out" "$out/boot0.bin" ;;
 esac
 cp "$chain/bt0.bin" "$chain/next.img" "$out/"
-(cd "$out" && sha256sum -- * > "$work/SHA256SUMS" && mv "$work/SHA256SUMS" SHA256SUMS && cat SHA256SUMS)
+(cd "$out" && sha256sum -- * >"$work/SHA256SUMS" && mv "$work/SHA256SUMS" SHA256SUMS && cat SHA256SUMS)
 echo "==> $board: $out/freebsd-$board.img"

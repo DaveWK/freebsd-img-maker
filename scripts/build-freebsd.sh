@@ -18,7 +18,10 @@ src=${FREEBSD_SRC:-$here/build/freebsd-src}
 obj=${OBJ:-$here/build/obj}
 stage=${STAGE:-$here/build/stage}
 jobs=${JOBS:-$(nproc)}
-die() { echo "build-freebsd: $*" >&2; exit 1; }
+die() {
+    echo "build-freebsd: $*" >&2
+    exit 1
+}
 
 [ "$(uname -s)" = Linux ] || die 'run on Linux'
 [ "$(id -u)" -ne 0 ] || die 'run unprivileged; nothing here needs root'
@@ -29,7 +32,7 @@ sh "$here/scripts/fetch-source.sh" >/dev/null
 
 mkdir -p "$obj" "$here/build/host-tools"
 # The bootstrap uses BSD date -ur EPOCH; translate it for GNU date.
-cat > "$here/build/host-tools/date" <<'EOF'
+cat >"$here/build/host-tools/date" <<'EOF'
 #!/bin/sh
 # Translate BSD epoch syntax for the Linux bootstrap host only.
 if [ "$1" = "-ur" ]; then
@@ -42,8 +45,8 @@ exec /bin/date "$@"
 EOF
 chmod 0755 "$here/build/host-tools/date"
 printf '.include "%s"\n.include "%s"\n' "$here/config/k1-world-make.conf" "$here/config/linux-host.mk" \
-    > "$here/build/world-make.conf"
-printf '.include "%s"\n' "$here/config/linux-host.mk" > "$here/build/kernel-make.conf"
+    >"$here/build/world-make.conf"
+printf '.include "%s"\n' "$here/config/linux-host.mk" >"$here/build/kernel-make.conf"
 
 make_k1() {
     conf=$1
@@ -53,7 +56,7 @@ make_k1() {
         python3 tools/build/make.py --no-clean --cross-bindir=/usr/bin -j"$jobs" \
         TARGET=riscv TARGET_ARCH=riscv64 NEWVERS_ARGS=-r \
         -DWITH_REPRODUCIBLE_BUILD -DWITH_REPRODUCIBLE_PATHS \
-        -DWITH_DISK_IMAGE_TOOLS_BOOTSTRAP "$@" < /dev/null)
+        -DWITH_DISK_IMAGE_TOOLS_BOOTSTRAP "$@" </dev/null)
 }
 
 echo '==> buildworld'
@@ -67,7 +70,7 @@ mkdir -p "$stage/world" "$stage/r2s" "$stage/rv2" "$stage/dtb"
 echo '==> installworld distribution'
 make_k1 "$here/build/world-make.conf" -DNO_ROOT DESTDIR="$stage/world" installworld distribution
 for board in r2s rv2; do
-    kernconf=$(echo "$board" | tr a-z A-Z)PROD
+    kernconf=$(echo "$board" | tr '[:lower:]' '[:upper:]')PROD
     echo "==> installkernel $kernconf"
     make_k1 "$here/build/kernel-make.conf" -DNO_ROOT DESTDIR="$stage/$board" \
         KERNCONF="$kernconf" installkernel
@@ -83,5 +86,5 @@ done
     echo "freebsd_tree=$(git -C "$src" rev-parse 'HEAD^{tree}')"
     echo "world_make_conf_sha256=$(sha256sum "$here/config/k1-world-make.conf" | cut -d' ' -f1)"
     echo "compiler=$(clang --version | sed -n 1p)"
-} > "$stage/BUILD"
+} >"$stage/BUILD"
 echo "FreeBSD staged in $stage"
