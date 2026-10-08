@@ -14,6 +14,15 @@ Status:
 - R2S: installed with fastboot and booted to login with SSH (October 2026). The FreeBSD kernel at the current pin also boots on it.
 - RV2: the image builds and its layout is checked, but it has not been boot-tested on hardware yet.
 
+## Device tree
+
+The images load their own DTB (`k1dtb_*` in `boards/*/loader.conf`) instead
+of the DT the firmware passes. The released boot chain does not yet write the
+board EEPROM's MAC addresses into its DT, so on the R2S `smte-macs.sh` sets
+them at boot; on the RV2 FreeBSD picks its own. The override stays until a
+boot-chain release that applies the EEPROM values, with a DT FreeBSD can use,
+has been tested on both boards.
+
 ## Login
 
 - User: `root`
